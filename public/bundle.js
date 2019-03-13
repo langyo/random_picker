@@ -50801,26 +50801,23 @@ const theme = (0, _styles.createMuiTheme)({
 });
 
 const styles = theme => ({
+  content: {
+    display: "relative",
+    padding: theme.spacing.unit * 3
+  },
   menu: {
     position: 'absolute',
     top: theme.spacing.unit * 2,
     left: theme.spacing.unit * 2
   },
-  fab: {
-    position: 'absolute',
-    bottom: theme.spacing.unit * 2,
-    right: theme.spacing.unit * 2
-  },
-  map: {
-    override: "hidden",
-    margin: "16px",
-    height: "584px",
-    width: "784px"
-  },
   paper: { ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
     paddingBottom: theme.spacing.unit * 2,
-    justifyContent: "center"
+    display: "absolute",
+    position: "fixed",
+    marginLeft: "auto",
+    marginRight: "auto",
+    width: 800
   }
 });
 
@@ -50857,7 +50854,9 @@ class MainWindow extends _reflux.default.Component {
     const {
       classes
     } = this.props;
-    return _react.default.createElement(_styles.MuiThemeProvider, {
+    return _react.default.createElement("div", {
+      className: classes.content
+    }, _react.default.createElement(_styles.MuiThemeProvider, {
       theme: theme
     }, _react.default.createElement(_Menu.default, {
       anchorEl: this.state.anchorEl,
@@ -50871,12 +50870,27 @@ class MainWindow extends _reflux.default.Component {
     }, option)))), _react.default.createElement(_IconButton.default, {
       className: classes.menu,
       onClick: this.handleOpenMenu
-    }, _react.default.createElement(_menu.default, null)), _react.default.createElement(_Paper.default, {
+    }, _react.default.createElement(_menu.default, null)), _react.default.createElement(_Grid.default, {
+      container: true,
+      spacing: 24,
+      direction: "row",
+      justify: "center",
+      alignItems: "flex-start"
+    }, _react.default.createElement(_Grid.default, {
+      item: true,
+      xs: true
+    }), _react.default.createElement(_Grid.default, {
+      item: true,
+      xs: 6
+    }, _react.default.createElement(_Paper.default, {
       className: classes.paper
     }, _react.default.createElement(_Typography.default, {
       paragraph: true,
       variant: "h5"
-    }, "\u6B63\u5728\u5EFA\u8BBE\u4E2D\uFF0C\u656C\u8BF7\u671F\u5F85\uFF01")));
+    }, "\u6B63\u5728\u5EFA\u8BBE\u4E2D\uFF0C\u656C\u8BF7\u671F\u5F85\uFF01"))), _react.default.createElement(_Grid.default, {
+      item: true,
+      xs: true
+    }))));
   }
 
 }

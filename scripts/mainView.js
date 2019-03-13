@@ -35,27 +35,24 @@ const theme = createMuiTheme({
 });
 
 const styles = theme => ({
+    content: {
+        display: "relative",
+        padding: theme.spacing.unit * 3
+    },
     menu: {
         position: 'absolute',
         top: theme.spacing.unit * 2,
         left: theme.spacing.unit * 2,
     },
-    fab: {
-        position: 'absolute',
-        bottom: theme.spacing.unit * 2,
-        right: theme.spacing.unit * 2
-    },
-    map: {
-        override: "hidden",
-        margin: "16px",
-        height: "584px",
-        width: "784px"
-    },
     paper: {
         ...theme.mixins.gutters(),
         paddingTop: theme.spacing.unit * 2,
         paddingBottom: theme.spacing.unit * 2,
-        justifyContent: "center"
+        display: "absolute",
+        position: "fixed",
+        marginLeft: "auto",
+        marginRight: "auto",
+        width: 800
     }
 });
 
@@ -90,32 +87,46 @@ class MainWindow extends Reflux.Component {
         const { classes } = this.props;
 
         return (
-            <MuiThemeProvider theme={theme}>
-                {/* 悬浮按钮部分 */}
-                <Menu
-                    anchorEl={this.state.anchorEl}
-                    open={Boolean(this.state.anchorEl)}
-                    onClose={this.handleCloseMenu}
-                >
-                    {options.map((option, index) => (
-                        <MenuItem
-                            key={index}
-                            onClick={event => this.handleMenuItemClick(event, index)}
-                        >
-                            <Typography variant="button">{option}</Typography>
-                        </MenuItem>
-                    ))}
-                </Menu>
-                <IconButton className={classes.menu} onClick={this.handleOpenMenu}>
-                    <MenuIcon />
-                </IconButton>
-                {/* 界面部分 */}
-                <Paper className={classes.paper}>
-                    <Typography paragraph variant="h5">
-                        正在建设中，敬请期待！
-                    </Typography>
-                </Paper>
-            </MuiThemeProvider>
+            <div className={classes.content}>
+                <MuiThemeProvider theme={theme}>
+                    {/* 悬浮按钮部分 */}
+                    <Menu
+                        anchorEl={this.state.anchorEl}
+                        open={Boolean(this.state.anchorEl)}
+                        onClose={this.handleCloseMenu}
+                    >
+                        {options.map((option, index) => (
+                            <MenuItem
+                                key={index}
+                                onClick={event => this.handleMenuItemClick(event, index)}
+                            >
+                                <Typography variant="button">{option}</Typography>
+                            </MenuItem>
+                        ))}
+                    </Menu>
+                    <IconButton className={classes.menu} onClick={this.handleOpenMenu}>
+                        <MenuIcon />
+                    </IconButton>
+                    {/* 界面部分 */}
+                    <Grid
+                        container
+                        spacing={24}
+                        direction="row"
+                        justify="center"
+                        alignItems="flex-start"
+                    >
+                        <Grid item xs/>
+                        <Grid item xs={6}>
+                            <Paper className={classes.paper}>
+                                <Typography paragraph variant="h5">
+                                    正在建设中，敬请期待！
+                            </Typography>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs/>
+                    </Grid>
+                </MuiThemeProvider>
+            </div>
         );
     }
 }
