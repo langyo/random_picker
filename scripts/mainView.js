@@ -20,6 +20,7 @@ import MenuIcon from 'mdi-material-ui/menu';
 import blue from '@material-ui/core/colors/blue';
 import red from '@material-ui/core/colors/red';
 
+import Grid from '@material-ui/core/Grid';
 import GridLayout from 'react-grid-layout';
 
 const theme = createMuiTheme({
@@ -49,6 +50,12 @@ const styles = theme => ({
         margin: "16px",
         height: "584px",
         width: "784px"
+    },
+    paper: {
+        ...theme.mixins.gutters(),
+        paddingTop: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing.unit * 2,
+        justifyContent: "center"
     }
 });
 
@@ -102,6 +109,12 @@ class MainWindow extends Reflux.Component {
                 <IconButton className={classes.menu} onClick={this.handleOpenMenu}>
                     <MenuIcon />
                 </IconButton>
+                {/* 界面部分 */}
+                <Paper className={classes.paper}>
+                    <Typography paragraph variant="h5">
+                        正在建设中，敬请期待！
+                    </Typography>
+                </Paper>
             </MuiThemeProvider>
         );
     }
