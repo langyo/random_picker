@@ -2,7 +2,7 @@
   "name": "random_picker",
   "version": "1.0.0",
   "description": "给物理老师写的专用课堂点名器！",
-  "main": "index.js",
+  "main": "public/bundle.js",
   "scripts": {
     "watch": "watchify ./scripts/mainViewRender.js -t babelify -o ./public/bundle.js --release --verbose",
     "build": "browserify ./scripts/mainViewRender.js -o ./public/js/bundle.js -t babelify",
