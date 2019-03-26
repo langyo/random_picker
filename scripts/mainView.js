@@ -35,24 +35,37 @@ const theme = createMuiTheme({
 });
 
 const styles = theme => ({
+    root: {
+        display: "flex"
+    },
+    appBar: {
+        marginLeft: drawerWidth
+    },
+    menuButton: {
+        marginRight: 20
+    },
+    button: {
+        margin: 4
+    },
+    toolbar: theme.mixins.toolbar,
+    drawerPaper: {
+        width: drawerWidth
+    },
     content: {
-        display: "relative",
+        flexGrow: 1,
         padding: theme.spacing.unit * 3
     },
-    menu: {
-        position: 'absolute',
-        top: theme.spacing.unit * 2,
-        left: theme.spacing.unit * 2,
-    },
     paper: {
-        ...theme.mixins.gutters(),
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
-        display: "absolute",
-        position: "fixed",
+        padding: 4,
+        margin: 4
+    },
+    center: {
+        width: 240,
         marginLeft: "auto",
-        marginRight: "auto",
-        width: 800
+        marginRight: "auto"
+    },
+    progress: {
+        margin: 24
     }
 });
 
@@ -87,44 +100,123 @@ class MainWindow extends Reflux.Component {
         const { classes } = this.props;
 
         return (
-            <div className={classes.content}>
+            <div className={classes.root}>
                 <MuiThemeProvider theme={theme}>
-                    {/* 悬浮按钮部分 */}
-                    <Menu
-                        anchorEl={this.state.anchorEl}
-                        open={Boolean(this.state.anchorEl)}
-                        onClose={this.handleCloseMenu}
-                    >
-                        {options.map((option, index) => (
-                            <MenuItem
-                                key={index}
-                                onClick={event => this.handleMenuItemClick(event, index)}
+                    <CssBaseline />
+                    <AppBar position="fixed" className={classes.appBar}>
+                        <Toolbar>
+                            <IconButton
+                                color="inherit"
+                                aria-label="打开侧边栏"
+                                onClick={this.handleDrawerToggle}
+                                className={classes.menuButton}
                             >
-                                <Typography variant="button">{option}</Typography>
-                            </MenuItem>
-                        ))}
-                    </Menu>
-                    <IconButton className={classes.menu} onClick={this.handleOpenMenu}>
-                        <MenuIcon />
-                    </IconButton>
-                    {/* 界面部分 */}
-                    <Grid
-                        container
-                        spacing={24}
-                        direction="row"
-                        justify="center"
-                        alignItems="flex-start"
-                    >
-                        <Grid item xs/>
-                        <Grid item xs={6}>
-                            <Paper className={classes.paper}>
-                                <Typography paragraph variant="h5">
-                                    正在建设中，敬请期待！
-                            </Typography>
-                            </Paper>
+                                <MenuIcon />
+                            </IconButton>
+                            <Typography variant="h6" color="inherit" noWrap>
+                                SPU
+                        </Typography>
+                        </Toolbar>
+                    </AppBar>
+                    <nav>
+                        <Drawer
+                            open={this.state.open}
+                            onClose={this.handleDrawerToggle}
+                            classes={{
+                                paper: classes.drawerPaper
+                            }}
+                        >
+                            <List>
+                                <ListItem button onClick={this.handleAboutDialogToggle}>
+                                    <ListItemIcon>
+                                        <InfoIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="关于" />
+                                </ListItem>
+                                <ListItem button disabled>
+                                    <ListItemIcon>
+                                        <ColorIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="更换主题" />
+                                </ListItem>
+                                <ListItem button onClick={this.handleClearCache}>
+                                    <ListItemIcon>
+                                        <DeleteIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="清除缓存" />
+                                </ListItem>
+                            </List>
+                            <Divider />
+                        </Drawer>
+                    </nav>
+                    <main className={classes.content}>
+                        <div className={classes.toolbar} />
+                        <Grid container spacing={8}>
+                            <Grid item lg md />
+                            <Grid item lg={4} md={8} xs={12}>
+                                <Paper className={classes.paper}>
+                                    <div className={classes.center}>
+                                        <Button
+                                            className={classes.button}
+                                            onClick={this.handleFromMenuOpen}
+                                        >
+                                            {versions[this.state.fromVersion]}
+                                        </Button>
+                                        <Button
+                                            className={classes.button}
+                                            variant="outlined"
+                                            color="primary"
+                                            onClick={this.handleBeginTransform}
+                                        >
+                                            <TransferIcon />
+                                        </Button>
+                                        <Button
+                                            className={classes.button}
+                                            onClick={this.handleToMenuOpen}
+                                        >
+                                            {versions[this.state.toVersion]}
+                                        </Button>
+                                    </div>
+                                </Paper>
+                            </Grid>
+                            <Grid item lg md />
                         </Grid>
-                        <Grid item xs/>
-                    </Grid>
+                        <Grid container spacing={8}>
+                            <Gird sm />
+                            <Grid item sm={6}>
+                                <TextField
+                                    id="before"
+                                    multiline
+                                    label="欲转换的命令/函数"
+                                    className={classes.textField}
+                                    margin="normal"
+                                    variant="outlined"
+                                    fullWidth
+                                    onChange={this.handleChangeInputCommand}
+                                    value={this.state.inputCommands}
+                                />
+                            </Grid>
+                            <Gird sm />
+                        </Grid>
+                        {/* 关于窗口 */}
+                        <Dialog
+                            open={this.state.aboutDialogOpen}
+                            onClose={this.handleAboutDialogToggle}
+                            scroll="paper"
+                        >
+                            <DialogTitle>关于</DialogTitle>
+                            <DialogContent>
+                                <Typography paragraph variant="p">
+                                    {"这里暂时先空着.png"}
+                                </Typography>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={this.handleAboutDialogToggle} color="primary">
+                                    {"确定"}
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+                    </main>
                 </MuiThemeProvider>
             </div>
         );
