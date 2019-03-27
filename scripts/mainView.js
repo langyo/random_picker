@@ -1,6 +1,3 @@
-const ipc = window.require('electron').ipcRenderer;
-const fs = window.require('fs');
-
 import React from "react";
 import Reflux from "reflux";
 import PropTypes from "prop-types";
@@ -126,19 +123,10 @@ const styles = theme => ({
 let randomNum = (minNum, maxNum) => parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
 
 class MainWindow extends Reflux.Component {
-    constructor(){
+    constructor() {
         super();
 
-        ipc.on('read-file', this.handleReadFile);
-        ipc.on('saved-file', this.handleWriteFile);
-
-        // 读取默认配置文件 default.json
-        fs.readFile('./default.json', (err, data) => {
-            if (err) {
-                return console.error(err);
-            }
-            this.setState({ groups: JSON.parse(data.toString()).list });
-         });
+        if (localStorage.getItem("cache") == null) localStorage.setItem("cache", JSON.stringify({ "list": [{ "name": "(示例)高一1班", "members": ["张三", "李四", "王五"] }, { "name": "(示例)高一2班", "members": ["张六", "李七", "王八"] }] }));
     }
 
     randomTimerObject = null;
@@ -158,9 +146,7 @@ class MainWindow extends Reflux.Component {
         groupChangeName: "",
         groupChangeBody: "",
         nowSelectedLuckyGuy: "点击开始",
-        groups: [
-            { name: "默认小组", members: ["张三", "李四", "王五"] },
-        ]
+        groups: JSON.parse(localStorage.getItem("cache")).list
     }
 
     handleDrawerOpen = () => this.setState({ open: true });
@@ -175,7 +161,8 @@ class MainWindow extends Reflux.Component {
         this.setState({
             listDialogOpen: false,
             groups: groups
-        })
+        });
+        localStorage.setItem("cache", JSON.stringify({list: groups}));
     }
 
     handleRoundingToggle = () => {
@@ -213,7 +200,8 @@ class MainWindow extends Reflux.Component {
             listDialogOpen: true,
             groupChangeName: "",
             groupChangeBody: ""
-        })
+        });
+        localStorage.setItem("cache", JSON.stringify({list: groups}));
     }
     handleGroupDelete = (n) => () => {
         let groups = this.state.groups;
@@ -222,28 +210,11 @@ class MainWindow extends Reflux.Component {
             menuSelect: null,
             groups: groups,
             choosingGroup: n > 0 ? n - 1 : 0
-        })
+        });
+        localStorage.setItem("cache", JSON.stringify({list: groups}));
     }
     handleGroupNameChange = (str) => this.setState({ groupChangeName: str });
     handleGroupListChange = (str) => this.setState({ groupChangeBody: str });
-    
-    handleReadFile = (e, path) => {
-        console.log(path);
-        fs.readFile(path[0], (err, data) => {
-            if (err) {
-                return console.error(err);
-            }
-            this.setState({ groups: JSON.parse(data.toString()).list });
-         });
-    }
-    handleWriteFile = (e, path) => {
-        console.log(path);
-        fs.writeFile(path, JSON.stringify({ list: this.state.groups }), (err) => {
-            if (err) {
-                return console.error(err);
-            }
-         });
-    }
 
     render() {
         const { classes } = this.props;
@@ -276,18 +247,6 @@ class MainWindow extends Reflux.Component {
                             }}
                         >
                             <List>
-                                <ListItem button onClick={() => ipc.send('read-file')}>
-                                    <ListItemIcon>
-                                        <FileReadIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary="导入名单" />
-                                </ListItem>
-                                <ListItem button onClick={() => ipc.send('write-file')}>
-                                    <ListItemIcon>
-                                        <FileWriteIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary="导出名单" />
-                                </ListItem>
                                 <ListItem button onClick={this.handleAboutDialogToggle}>
                                     <ListItemIcon>
                                         <InfoIcon />

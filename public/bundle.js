@@ -52779,10 +52779,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-const ipc = window.require('electron').ipcRenderer;
-
-const fs = window.require('fs');
-
 const drawerWidth = 240;
 const theme = (0, _styles.createMuiTheme)({
   palette: {
@@ -52871,10 +52867,7 @@ class MainWindow extends _reflux.default.Component {
       groupChangeName: "",
       groupChangeBody: "",
       nowSelectedLuckyGuy: "点击开始",
-      groups: [{
-        name: "默认小组",
-        members: ["张三", "李四", "王五"]
-      }]
+      groups: JSON.parse(localStorage.getItem("cache")).list
     });
 
     _defineProperty(this, "handleDrawerOpen", () => this.setState({
@@ -52901,6 +52894,9 @@ class MainWindow extends _reflux.default.Component {
         listDialogOpen: false,
         groups: groups
       });
+      localStorage.setItem("cache", JSON.stringify({
+        list: groups
+      }));
     });
 
     _defineProperty(this, "handleRoundingToggle", () => {
@@ -52958,6 +52954,9 @@ class MainWindow extends _reflux.default.Component {
         groupChangeName: "",
         groupChangeBody: ""
       });
+      localStorage.setItem("cache", JSON.stringify({
+        list: groups
+      }));
     });
 
     _defineProperty(this, "handleGroupDelete", n => () => {
@@ -52968,6 +52967,9 @@ class MainWindow extends _reflux.default.Component {
         groups: groups,
         choosingGroup: n > 0 ? n - 1 : 0
       });
+      localStorage.setItem("cache", JSON.stringify({
+        list: groups
+      }));
     });
 
     _defineProperty(this, "handleGroupNameChange", str => this.setState({
@@ -52978,42 +52980,15 @@ class MainWindow extends _reflux.default.Component {
       groupChangeBody: str
     }));
 
-    _defineProperty(this, "handleReadFile", (e, path) => {
-      console.log(path);
-      fs.readFile(path[0], (err, data) => {
-        if (err) {
-          return console.error(err);
-        }
-
-        this.setState({
-          groups: JSON.parse(data.toString()).list
-        });
-      });
-    });
-
-    _defineProperty(this, "handleWriteFile", (e, path) => {
-      console.log(path);
-      fs.writeFile(path, JSON.stringify({
-        list: this.state.groups
-      }), err => {
-        if (err) {
-          return console.error(err);
-        }
-      });
-    });
-
-    ipc.on('read-file', this.handleReadFile);
-    ipc.on('saved-file', this.handleWriteFile); // 读取默认配置文件 default.json
-
-    fs.readFile('./default.json', (err, data) => {
-      if (err) {
-        return console.error(err);
-      }
-
-      this.setState({
-        groups: JSON.parse(data.toString()).list
-      });
-    });
+    if (localStorage.getItem("cache") == null) localStorage.setItem("cache", JSON.stringify({
+      "list": [{
+        "name": "(示例)高一1班",
+        "members": ["张三", "李四", "王五"]
+      }, {
+        "name": "(示例)高一2班",
+        "members": ["张六", "李七", "王八"]
+      }]
+    }));
   }
 
   render() {
@@ -53043,16 +53018,6 @@ class MainWindow extends _reflux.default.Component {
         paper: classes.drawerPaper
       }
     }, _react.default.createElement(_List.default, null, _react.default.createElement(_ListItem.default, {
-      button: true,
-      onClick: () => ipc.send('read-file')
-    }, _react.default.createElement(_ListItemIcon.default, null, _react.default.createElement(_fileDownload.default, null)), _react.default.createElement(_ListItemText.default, {
-      primary: "\u5BFC\u5165\u540D\u5355"
-    })), _react.default.createElement(_ListItem.default, {
-      button: true,
-      onClick: () => ipc.send('write-file')
-    }, _react.default.createElement(_ListItemIcon.default, null, _react.default.createElement(_fileSend.default, null)), _react.default.createElement(_ListItemText.default, {
-      primary: "\u5BFC\u51FA\u540D\u5355"
-    })), _react.default.createElement(_ListItem.default, {
       button: true,
       onClick: this.handleAboutDialogToggle
     }, _react.default.createElement(_ListItemIcon.default, null, _react.default.createElement(_information.default, null)), _react.default.createElement(_ListItemText.default, {
