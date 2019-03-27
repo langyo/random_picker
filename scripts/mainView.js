@@ -71,7 +71,8 @@ const styles = theme => ({
         display: "flex"
     },
     appBar: {
-        marginLeft: drawerWidth
+        marginLeft: drawerWidth,
+        opacity: 0.8
     },
     menuButton: {
         marginRight: 20
@@ -83,7 +84,8 @@ const styles = theme => ({
     },
     toolbar: theme.mixins.toolbar,
     drawerPaper: {
-        width: drawerWidth
+        width: drawerWidth,
+        opacity: 0.8
     },
     content: {
         flexGrow: 1,
@@ -108,9 +110,12 @@ const styles = theme => ({
 });
 
 class MainWindow extends Reflux.Component {
+    randomTimerObject = null;
+
     state = {
         open: false,
         rounding: false,
+        timeInterval: 100,
 
         aboutDialogOpen: false,
         listDialogOpen: false,
@@ -118,7 +123,8 @@ class MainWindow extends Reflux.Component {
         anchorEl: null,
 
         choosingGroup: 0,
-        groups: [{ name: "默认分组", members: [] }]
+        nowSelectedLuckyGuy: "点击开始",
+        groups: [{ name: "默认分组", members: ["a", "b", "c", "d", "e", "f"] }]
     }
 
     handleDrawerOpen = () => this.setState({ open: true });
@@ -127,7 +133,20 @@ class MainWindow extends Reflux.Component {
     handleAboutDialogToggle = () => this.setState({ aboutDialogOpen: !this.state.aboutDialogOpen });
     handleListDialogToggle = () => this.setState({ listDialogOpen: !this.state.listDialogOpen });
 
-    handleRoundingToggle = () => this.setState({ rounding: !this.state.rounding });
+    handleRoundingToggle = () => {
+        this.setState({ rounding: !this.state.rounding }, () => {
+            if(this.state.rounding){
+                this.timer = setInterval(() => {
+                    let members = this.state.groups[this.state.choosingGroup].members;
+                    let picked = Math.round(Math.random() * members.length);
+                    this.setState({ nowSelectedLuckyGuy: picked });
+                }, this.state.timeInterval);
+            }else{
+                clearInterval(this.timer);
+            }
+        });
+        
+    }
     handleListToggle = () => this.setState({ listOpen: !this.state.listOpen });
 
     render() {
@@ -209,7 +228,7 @@ class MainWindow extends Reflux.Component {
                         <Card className={classes.card}>
                             <CardContent>
                                 <Typography variant="h4" gutterBottom>
-                                    点击按钮以开始
+                                    {this.state.nowSelectedLuckyGuy}
                                 </Typography>
                             </CardContent>
                             <CardActions>

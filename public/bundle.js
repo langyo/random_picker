@@ -52752,7 +52752,8 @@ const styles = theme => ({
     display: "flex"
   },
   appBar: {
-    marginLeft: drawerWidth
+    marginLeft: drawerWidth,
+    opacity: 0.8
   },
   menuButton: {
     marginRight: 20
@@ -52764,7 +52765,8 @@ const styles = theme => ({
   },
   toolbar: theme.mixins.toolbar,
   drawerPaper: {
-    width: drawerWidth
+    width: drawerWidth,
+    opacity: 0.8
   },
   content: {
     flexGrow: 1,
@@ -52792,17 +52794,21 @@ class MainWindow extends _reflux.default.Component {
   constructor(...args) {
     super(...args);
 
+    _defineProperty(this, "randomTimerObject", null);
+
     _defineProperty(this, "state", {
       open: false,
       rounding: false,
+      timeInterval: 100,
       aboutDialogOpen: false,
       listDialogOpen: false,
       listOpen: false,
       anchorEl: null,
       choosingGroup: 0,
+      nowSelectedLuckyGuy: "点击开始",
       groups: [{
         name: "默认分组",
-        members: []
+        members: ["a", "b", "c", "d", "e", "f"]
       }]
     });
 
@@ -52822,9 +52828,23 @@ class MainWindow extends _reflux.default.Component {
       listDialogOpen: !this.state.listDialogOpen
     }));
 
-    _defineProperty(this, "handleRoundingToggle", () => this.setState({
-      rounding: !this.state.rounding
-    }));
+    _defineProperty(this, "handleRoundingToggle", () => {
+      this.setState({
+        rounding: !this.state.rounding
+      }, () => {
+        if (this.state.rounding) {
+          this.timer = setInterval(() => {
+            let members = this.state.groups[this.state.choosingGroup].members;
+            let picked = Math.round(Math.random() * members.length);
+            this.setState({
+              nowSelectedLuckyGuy: picked
+            });
+          }, this.state.timeInterval);
+        } else {
+          clearInterval(this.timer);
+        }
+      });
+    });
 
     _defineProperty(this, "handleListToggle", () => this.setState({
       listOpen: !this.state.listOpen
@@ -52903,7 +52923,7 @@ class MainWindow extends _reflux.default.Component {
     }, _react.default.createElement(_CardContent.default, null, _react.default.createElement(_Typography.default, {
       variant: "h4",
       gutterBottom: true
-    }, "\u70B9\u51FB\u6309\u94AE\u4EE5\u5F00\u59CB")), _react.default.createElement(_CardActions.default, null, !this.state.rounding && _react.default.createElement(_Button.default, {
+    }, this.state.nowSelectedLuckyGuy)), _react.default.createElement(_CardActions.default, null, !this.state.rounding && _react.default.createElement(_Button.default, {
       className: (0, _classnames.default)(classes.button),
       variant: "contained",
       color: "primary",
