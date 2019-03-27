@@ -40,9 +40,10 @@ import PacManIcon from 'mdi-material-ui/pacMan';
 import StopIcon from 'mdi-material-ui/stop';
 import PeopleIcon from 'mdi-material-ui/accountGroup';
 import HumanIcon from 'mdi-material-ui/humanHandsdown';
-import HumansIcon from 'mdi-material-ui/humanMaleMale';
 import ExpandLessIcon from 'mdi-material-ui/chevronDown';
 import ExpandMoreIcon from 'mdi-material-ui/chevronRight';
+import CloseIcon from 'mdi-material-ui/close';
+import MoreIcon from 'mdi-material-ui/dotsHorizontal';
 
 import blue from '@material-ui/core/colors/blue';
 import red from '@material-ui/core/colors/red';
@@ -69,6 +70,9 @@ const theme = createMuiTheme({
 const styles = theme => ({
     root: {
         display: "flex"
+    },
+    flex: {
+        flex: 1
     },
     appBar: {
         marginLeft: drawerWidth,
@@ -106,8 +110,16 @@ const styles = theme => ({
         marginLeft: "auto",
         marginRight: "auto",
         textAlign: "center"
+    },
+    textField: {
+        width: "90%",
+        height: 500,
+        marginLeft: "auto",
+        marginRight: "auto"
     }
 });
+
+let randomNum = (minNum, maxNum) => parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
 
 class MainWindow extends Reflux.Component {
     randomTimerObject = null;
@@ -119,35 +131,83 @@ class MainWindow extends Reflux.Component {
 
         aboutDialogOpen: false,
         listDialogOpen: false,
-        listOpen: false,
+        listOpen: true,
+        menuSelect: null,
         anchorEl: null,
 
         choosingGroup: 0,
+        groupChangeName: "",
+        groupChangeBody: "",
         nowSelectedLuckyGuy: "点击开始",
-        groups: [{ name: "默认分组", members: ["a", "b", "c", "d", "e", "f"] }]
+        groups: [
+            { name: "小组1", members: ["张三", "李四", "王五", "赵六", "崔琦", "佩奇"] },
+            { name: "小组2", members: ["1", "3", "5", "7", "9", "12"] }
+        ]
     }
 
     handleDrawerOpen = () => this.setState({ open: true });
     handleDrawerClose = () => this.setState({ open: false });
 
     handleAboutDialogToggle = () => this.setState({ aboutDialogOpen: !this.state.aboutDialogOpen });
-    handleListDialogToggle = () => this.setState({ listDialogOpen: !this.state.listDialogOpen });
+    handleListDialogOpen = () => this.setState({ listDialogOpen: !this.state.listDialogOpen });
+    handleListDialogClose = () => {
+        let groups = this.state.groups;
+        groups[this.state.choosingGroup].name = this.state.groupChangeName;
+        groups[this.state.choosingGroup].members = this.state.groupChangeBody.split("\n");
+        this.setState({
+            listDialogOpen: false,
+            groups: groups
+        })
+    }
 
     handleRoundingToggle = () => {
         this.setState({ rounding: !this.state.rounding }, () => {
-            if(this.state.rounding){
+            if (this.state.rounding) {
                 this.timer = setInterval(() => {
                     let members = this.state.groups[this.state.choosingGroup].members;
-                    let picked = Math.round(Math.random() * members.length);
-                    this.setState({ nowSelectedLuckyGuy: picked });
+                    let picked = randomNum(0, members.length - 1);
+                    this.setState({ nowSelectedLuckyGuy: this.state.groups[this.state.choosingGroup].members[picked] });
                 }, this.state.timeInterval);
-            }else{
+            } else {
                 clearInterval(this.timer);
             }
         });
-        
     }
+    handleListMenuToggle = (n) => () => this.setState({ menuSelect: this.state.menuSelect == null ? n : null, choosingGroup: n });
     handleListToggle = () => this.setState({ listOpen: !this.state.listOpen });
+    handleGroupSelected = (n) => () => this.setState({ choosingGroup: n });
+    handleGroupChangeWindow = (n) => () => {
+        this.setState({
+            open: false,
+            menuSelect: null,
+            listDialogOpen: true,
+            groupChangeName: this.state.groups[n].name,
+            groupChangeBody: this.state.groups[n].members.reduce((prev, next) => prev + "\n" + next)
+        })
+    }
+    handleGroupNew = () => {
+        let groups = this.state.groups;
+        groups.push({ name: "新小组", members: []});
+        this.setState({
+            menuSelect: null,
+            groups: groups,
+            choosingGroup: groups.length - 1,
+            listDialogOpen: true,
+            groupChangeName: "",
+            groupChangeBody: ""
+        })
+    }
+    handleGroupDelete = (n) => () => {
+        let groups = this.state.groups;
+        groups.splice(n, 1);
+        this.setState({
+            menuSelect: null,
+            groups: groups,
+            choosingGroup: n > 0 ? n - 1 : 0
+        })
+    }
+    handleGroupNameChange = (str) => this.setState({ groupChangeName: str });
+    handleGroupListChange = (str) => this.setState({ groupChangeBody: str });
 
     render() {
         const { classes } = this.props;
@@ -180,12 +240,6 @@ class MainWindow extends Reflux.Component {
                             }}
                         >
                             <List>
-                                <ListItem button onClick={this.handleListDialogToggle}>
-                                    <ListItemIcon>
-                                        <PeopleIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary="配置点名名单" />
-                                </ListItem>
                                 <ListItem button onClick={this.handleAboutDialogToggle}>
                                     <ListItemIcon>
                                         <InfoIcon />
@@ -196,7 +250,7 @@ class MainWindow extends Reflux.Component {
                                 {/* 小组名单 */}
                                 <ListItem button onClick={this.handleListToggle}>
                                     <ListItemIcon>
-                                        <HumansIcon />
+                                        <PeopleIcon />
                                     </ListItemIcon>
                                     <ListItemText inset primary="选择小组" />
                                     {this.state.listOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -204,14 +258,31 @@ class MainWindow extends Reflux.Component {
                                 <Collapse in={this.state.listOpen} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
                                         {this.state.groups.map((n, index) => (
-                                            <ListItem key={index} button className={classes.nested} selected={this.state.choosingGroup == index}>
+                                            <ListItem
+                                                key={index}
+                                                button
+                                                className={classes.nested}
+                                                selected={this.state.choosingGroup == index}
+                                                onClick={this.handleGroupSelected(index)}
+                                            >
                                                 <ListItemIcon>
                                                     <HumanIcon />
                                                 </ListItemIcon>
                                                 <ListItemText inset primary={n.name} />
+                                                <Menu
+                                                    anchorEl={this.state.anchorEl}
+                                                    open={this.state.menuSelect == index}
+                                                    onClose={this.handleListMenuToggle(index)}
+                                                >
+                                                    <MenuItem onClick={this.handleGroupChangeWindow(index)}>修改</MenuItem>
+                                                    <MenuItem disabled={this.state.groups.length <= 1} onClick={this.handleGroupDelete(index)}>删除</MenuItem>
+                                                </Menu>
+                                                <IconButton onClick={this.handleListMenuToggle(index)}>
+                                                    <MoreIcon />
+                                                </IconButton>
                                             </ListItem>
                                         ))}
-                                        <ListItem button className={classes.nested}>
+                                        <ListItem button className={classes.nested} onClick={this.handleGroupNew}>
                                             <ListItemIcon>
                                                 <AddIcon />
                                             </ListItemIcon>
@@ -229,6 +300,9 @@ class MainWindow extends Reflux.Component {
                             <CardContent>
                                 <Typography variant="h4" gutterBottom>
                                     {this.state.nowSelectedLuckyGuy}
+                                </Typography>
+                                <Typography variant="caption" gutterBottom>
+                                    当前正在抽取 {this.state.groups[this.state.choosingGroup] && this.state.groups[this.state.choosingGroup].name} ，共 {this.state.groups[this.state.choosingGroup] && this.state.groups[this.state.choosingGroup].members.length} 人
                                 </Typography>
                             </CardContent>
                             <CardActions>
@@ -257,20 +331,42 @@ class MainWindow extends Reflux.Component {
                         {/* 人员配置窗口 */}
                         <Dialog
                             open={this.state.listDialogOpen}
-                            onClose={this.handleListDialogToggle}
+                            onClose={this.handleListDialogOpen}
                             scroll="paper"
+                            fullScreen
                         >
-                            <DialogTitle>配置点名人员名单</DialogTitle>
-                            <DialogContent>
-                                <Typography paragraph variant="p">
-                                    {"这里暂时先空着.png"}
-                                </Typography>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={this.handleListDialogToggle} color="primary">
-                                    {"确定"}
-                                </Button>
-                            </DialogActions>
+                            <div className={classes.toolbar} />
+                            <AppBar className={classes.appBar}>
+                                <Toolbar>
+                                    <IconButton color="inherit" onClick={this.handleListDialogOpen} aria-label="Close">
+                                        <CloseIcon />
+                                    </IconButton>
+                                    <Typography variant="h6" color="inherit" className={classes.flex}>
+                                        配置点名人员名单
+                                    </Typography>
+                                    <Button color="inherit" onClick={this.handleListDialogClose}>
+                                        保存
+                                    </Button>
+                                </Toolbar>
+                            </AppBar>
+                            <TextField
+                                label="小组名"
+                                defaultValue={this.state.groupChangeName}
+                                className={classes.textField}
+                                margin="normal"
+                                onChange={e => this.handleGroupNameChange(e.target.value)}
+                            />
+                            <TextField
+                                label="花名册"
+                                placeholder="请输入名单，以换行隔开不同姓名"
+                                defaultValue={this.state.groupChangeBody}
+                                multiline
+                                rowsMax="16"
+                                className={classes.textField}
+                                margin="normal"
+                                variant="outlined"
+                                onChange={e => this.handleGroupListChange(e.target.value)}
+                            />
                         </Dialog>
                         {/* 关于窗口 */}
                         <Dialog
@@ -281,8 +377,14 @@ class MainWindow extends Reflux.Component {
                             <DialogTitle>关于</DialogTitle>
                             <DialogContent>
                                 <Typography paragraph variant="p">
-                                    {"这里暂时先空着.png"}
+                                    欢迎使用“海点”点名器！
                                 </Typography>
+                                <Typography paragraph variant="p">
+                                    有道“海纳百川，有容乃大”，本款点名器以此为寓意，希望既能起到点名的作用，又能让使用本点名器的课堂或者活动有着大海一般的希望和深度。
+                                </Typography>
+                                <Button variant="contained" onClick={() => shell.openExternal("https://github.com/langyo/random_picker")}>
+                                    该软件的开源地址
+                                </Button>
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={this.handleAboutDialogToggle} color="primary">
