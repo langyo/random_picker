@@ -52854,22 +52854,6 @@ class MainWindow extends _reflux.default.Component {
 
     _defineProperty(this, "randomTimerObject", null);
 
-    _defineProperty(this, "state", {
-      open: false,
-      rounding: false,
-      timeInterval: 100,
-      aboutDialogOpen: false,
-      listDialogOpen: false,
-      listOpen: true,
-      menuSelect: null,
-      anchorEl: null,
-      choosingGroup: 0,
-      groupChangeName: "",
-      groupChangeBody: "",
-      nowSelectedLuckyGuy: "点击开始",
-      groups: JSON.parse(localStorage.getItem("cache")).list
-    });
-
     _defineProperty(this, "handleDrawerOpen", () => this.setState({
       open: true
     }));
@@ -52989,6 +52973,21 @@ class MainWindow extends _reflux.default.Component {
         "members": ["张六", "李七", "王八"]
       }]
     }));
+    this.state = {
+      open: false,
+      rounding: false,
+      timeInterval: 100,
+      aboutDialogOpen: false,
+      listDialogOpen: false,
+      listOpen: true,
+      menuSelect: null,
+      anchorEl: null,
+      choosingGroup: 0,
+      groupChangeName: "",
+      groupChangeBody: "",
+      nowSelectedLuckyGuy: "点击开始",
+      groups: JSON.parse(localStorage.getItem("cache")).list
+    };
   }
 
   render() {

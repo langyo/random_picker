@@ -127,27 +127,27 @@ class MainWindow extends Reflux.Component {
         super();
 
         if (localStorage.getItem("cache") == null) localStorage.setItem("cache", JSON.stringify({ "list": [{ "name": "(示例)高一1班", "members": ["张三", "李四", "王五"] }, { "name": "(示例)高一2班", "members": ["张六", "李七", "王八"] }] }));
+    
+        this.state = {
+            open: false,
+            rounding: false,
+            timeInterval: 100,
+    
+            aboutDialogOpen: false,
+            listDialogOpen: false,
+            listOpen: true,
+            menuSelect: null,
+            anchorEl: null,
+    
+            choosingGroup: 0,
+            groupChangeName: "",
+            groupChangeBody: "",
+            nowSelectedLuckyGuy: "点击开始",
+            groups: JSON.parse(localStorage.getItem("cache")).list
+        }
     }
 
     randomTimerObject = null;
-
-    state = {
-        open: false,
-        rounding: false,
-        timeInterval: 100,
-
-        aboutDialogOpen: false,
-        listDialogOpen: false,
-        listOpen: true,
-        menuSelect: null,
-        anchorEl: null,
-
-        choosingGroup: 0,
-        groupChangeName: "",
-        groupChangeBody: "",
-        nowSelectedLuckyGuy: "点击开始",
-        groups: JSON.parse(localStorage.getItem("cache")).list
-    }
 
     handleDrawerOpen = () => this.setState({ open: true });
     handleDrawerClose = () => this.setState({ open: false });
