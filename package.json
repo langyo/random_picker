@@ -6,6 +6,7 @@
   "scripts": {
     "watch": "watchify ./scripts/mainViewRender.js -t babelify -o ./public/bundle.js --release --verbose",
     "build": "browserify ./scripts/mainViewRender.js -o ./public/js/bundle.js -t babelify",
+    "start": "electron ./index.js --inspect=5858",
     "test": "jest --watch"
   },
   "repository": {
@@ -33,15 +34,10 @@
     "mdi-material-ui": "^5.8.0",
     "prop-types": "^15.6.2",
     "react": "^16.6.3",
-    "react-custom-scroll": "^4.0.1",
-    "react-desktop": "^0.3.7",
     "react-dom": "^16.6.3",
-    "react-grid-layout": "^0.16.6",
-    "react-json-view": "^1.19.1",
-    "react-swipeable-views": "^0.13.0",
-    "react-swipeable-views-utils": "^0.13.0",
     "reflux": "^6.4.1",
     "regenerator-runtime": "^0.13.1",
+    "uglifyjs": "^2.4.11",
     "shortid": "^2.2.14",
     "typescript": "^2.8.3",
     "watchify": "^3.11.1",
@@ -51,6 +47,9 @@
   "devDependencies": {
     "babelify": "^10.0.0",
     "browserify": "^16.2.3",
+    "electron": "^3.0.10",
+    "electron-builder": "^20.38.5",
+    "electron-packager": "^13.0.1",
     "jest": "^24.1.0"
   },
   "babel": {

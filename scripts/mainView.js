@@ -28,13 +28,21 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+import Collapse from '@material-ui/core/Collapse';
 
 import AddIcon from 'mdi-material-ui/plus';
 import MenuIcon from 'mdi-material-ui/menu';
 import InfoIcon from 'mdi-material-ui/information';
 import PacManIcon from 'mdi-material-ui/pacMan';
 import StopIcon from 'mdi-material-ui/stop';
-import PeopleIcon from 'mdi-material-ui/accountGroup'
+import PeopleIcon from 'mdi-material-ui/accountGroup';
+import HumanIcon from 'mdi-material-ui/humanHandsdown';
+import HumansIcon from 'mdi-material-ui/humanMaleMale';
+import ExpandLessIcon from 'mdi-material-ui/chevronDown';
+import ExpandMoreIcon from 'mdi-material-ui/chevronRight';
 
 import blue from '@material-ui/core/colors/blue';
 import red from '@material-ui/core/colors/red';
@@ -69,8 +77,9 @@ const styles = theme => ({
         marginRight: 20
     },
     button: {
-        margin: 4,
-        width: 150
+        width: 150,
+        marginLeft: "auto",
+        marginRight: "auto"
     },
     toolbar: theme.mixins.toolbar,
     drawerPaper: {
@@ -85,29 +94,41 @@ const styles = theme => ({
     },
     extendedIcon: {
         marginRight: theme.spacing.unit,
+    },
+    nested: {
+        paddingLeft: theme.spacing.unit * 4,
+    },
+    card: {
+        width: 280,
+        opacity: 0.8,
+        marginLeft: "auto",
+        marginRight: "auto",
+        textAlign: "center"
     }
 });
 
 class MainWindow extends Reflux.Component {
-    static defaultProps = {
-        color: '#66ccff',
-        theme: 'light'
-    };
-
     state = {
         open: false,
         rounding: false,
 
         aboutDialogOpen: false,
-        anchorEl: null
+        listDialogOpen: false,
+        listOpen: false,
+        anchorEl: null,
+
+        choosingGroup: 0,
+        groups: [{ name: "默认分组", members: [] }]
     }
 
     handleDrawerOpen = () => this.setState({ open: true });
     handleDrawerClose = () => this.setState({ open: false });
 
     handleAboutDialogToggle = () => this.setState({ aboutDialogOpen: !this.state.aboutDialogOpen });
+    handleListDialogToggle = () => this.setState({ listDialogOpen: !this.state.listDialogOpen });
 
     handleRoundingToggle = () => this.setState({ rounding: !this.state.rounding });
+    handleListToggle = () => this.setState({ listOpen: !this.state.listOpen });
 
     render() {
         const { classes } = this.props;
@@ -140,7 +161,7 @@ class MainWindow extends Reflux.Component {
                             }}
                         >
                             <List>
-                                <ListItem button>
+                                <ListItem button onClick={this.handleListDialogToggle}>
                                     <ListItemIcon>
                                         <PeopleIcon />
                                     </ListItemIcon>
@@ -152,15 +173,46 @@ class MainWindow extends Reflux.Component {
                                     </ListItemIcon>
                                     <ListItemText primary="关于" />
                                 </ListItem>
+                                <Divider />
+                                {/* 小组名单 */}
+                                <ListItem button onClick={this.handleListToggle}>
+                                    <ListItemIcon>
+                                        <HumansIcon />
+                                    </ListItemIcon>
+                                    <ListItemText inset primary="选择小组" />
+                                    {this.state.listOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                </ListItem>
+                                <Collapse in={this.state.listOpen} timeout="auto" unmountOnExit>
+                                    <List component="div" disablePadding>
+                                        {this.state.groups.map((n, index) => (
+                                            <ListItem key={index} button className={classes.nested} selected={this.state.choosingGroup == index}>
+                                                <ListItemIcon>
+                                                    <HumanIcon />
+                                                </ListItemIcon>
+                                                <ListItemText inset primary={n.name} />
+                                            </ListItem>
+                                        ))}
+                                        <ListItem button className={classes.nested}>
+                                            <ListItemIcon>
+                                                <AddIcon />
+                                            </ListItemIcon>
+                                            <ListItemText inset primary={"添加新的小组"} />
+                                        </ListItem>
+                                    </List>
+                                </Collapse>
                             </List>
                             <Divider />
                         </Drawer>
                     </nav>
                     <main className={classes.content}>
                         <div className={classes.toolbar} />
-                        <Grid container spacing={8}>
-                            <Grid item sm />
-                            <Grid item sm={1}>
+                        <Card className={classes.card}>
+                            <CardContent>
+                                <Typography variant="h4" gutterBottom>
+                                    点击按钮以开始
+                                </Typography>
+                            </CardContent>
+                            <CardActions>
                                 {(!this.state.rounding) && (<Button
                                     className={classNames(classes.button)}
                                     variant="contained"
@@ -181,9 +233,26 @@ class MainWindow extends Reflux.Component {
                                     <StopIcon className={classes.extendedIcon} />
                                     停！
                                 </Button>)}
-                            </Grid>
-                            <Grid item sm />
-                        </Grid>
+                            </CardActions>
+                        </Card>
+                        {/* 人员配置窗口 */}
+                        <Dialog
+                            open={this.state.listDialogOpen}
+                            onClose={this.handleListDialogToggle}
+                            scroll="paper"
+                        >
+                            <DialogTitle>配置点名人员名单</DialogTitle>
+                            <DialogContent>
+                                <Typography paragraph variant="p">
+                                    {"这里暂时先空着.png"}
+                                </Typography>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={this.handleListDialogToggle} color="primary">
+                                    {"确定"}
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
                         {/* 关于窗口 */}
                         <Dialog
                             open={this.state.aboutDialogOpen}
