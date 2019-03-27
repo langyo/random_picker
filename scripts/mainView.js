@@ -6,27 +6,51 @@ import shortid from "shortid";
 
 import { withStyles } from "@material-ui/core/styles";
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
 
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Drawer from '@material-ui/core/Drawer';
 import Typography from '@material-ui/core/Typography';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import IconButton from '@material-ui/core/IconButton';
 import Fab from '@material-ui/core/Fab';
 import Paper from '@material-ui/core/Paper';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Divider from '@material-ui/core/Divider';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
 
 import AddIcon from 'mdi-material-ui/plus';
 import MenuIcon from 'mdi-material-ui/menu';
+import InfoIcon from 'mdi-material-ui/information';
+import PacManIcon from 'mdi-material-ui/pacMan';
+import StopIcon from 'mdi-material-ui/stop';
+import PeopleIcon from 'mdi-material-ui/accountGroup'
 
 import blue from '@material-ui/core/colors/blue';
 import red from '@material-ui/core/colors/red';
 
 import Grid from '@material-ui/core/Grid';
-import GridLayout from 'react-grid-layout';
+
+const drawerWidth = 240;
 
 const theme = createMuiTheme({
     palette: {
-        primary: blue,
-        secondary: blue,
+        primary: {
+            main: '#006064',
+        },
+        secondary: {
+            main: '#006064',
+        },
         error: red
     },
     typography: {
@@ -45,7 +69,8 @@ const styles = theme => ({
         marginRight: 20
     },
     button: {
-        margin: 4
+        margin: 4,
+        width: 150
     },
     toolbar: theme.mixins.toolbar,
     drawerPaper: {
@@ -55,24 +80,13 @@ const styles = theme => ({
         flexGrow: 1,
         padding: theme.spacing.unit * 3
     },
-    paper: {
-        padding: 4,
-        margin: 4
-    },
-    center: {
-        width: 240,
-        marginLeft: "auto",
-        marginRight: "auto"
-    },
     progress: {
         margin: 24
+    },
+    extendedIcon: {
+        marginRight: theme.spacing.unit,
     }
 });
-
-const options = [
-    "人员名单配置",
-    "关于"
-];
 
 class MainWindow extends Reflux.Component {
     static defaultProps = {
@@ -81,20 +95,19 @@ class MainWindow extends Reflux.Component {
     };
 
     state = {
+        open: false,
+        rounding: false,
+
+        aboutDialogOpen: false,
         anchorEl: null
     }
 
-    handleOpenMenu = event => {
-        this.setState({ anchorEl: event.currentTarget });
-    };
+    handleDrawerOpen = () => this.setState({ open: true });
+    handleDrawerClose = () => this.setState({ open: false });
 
-    handleMenuItemClick = (event, index) => {
-        this.setState({ anchorEl: null });
-    };
+    handleAboutDialogToggle = () => this.setState({ aboutDialogOpen: !this.state.aboutDialogOpen });
 
-    handleCloseMenu = () => {
-        this.setState({ anchorEl: null });
-    };
+    handleRoundingToggle = () => this.setState({ rounding: !this.state.rounding });
 
     render() {
         const { classes } = this.props;
@@ -108,42 +121,36 @@ class MainWindow extends Reflux.Component {
                             <IconButton
                                 color="inherit"
                                 aria-label="打开侧边栏"
-                                onClick={this.handleDrawerToggle}
+                                onClick={this.handleDrawerOpen}
                                 className={classes.menuButton}
                             >
                                 <MenuIcon />
                             </IconButton>
                             <Typography variant="h6" color="inherit" noWrap>
-                                SPU
-                        </Typography>
+                                海点
+                            </Typography>
                         </Toolbar>
                     </AppBar>
                     <nav>
                         <Drawer
                             open={this.state.open}
-                            onClose={this.handleDrawerToggle}
+                            onClose={this.handleDrawerClose}
                             classes={{
                                 paper: classes.drawerPaper
                             }}
                         >
                             <List>
+                                <ListItem button>
+                                    <ListItemIcon>
+                                        <PeopleIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="配置点名名单" />
+                                </ListItem>
                                 <ListItem button onClick={this.handleAboutDialogToggle}>
                                     <ListItemIcon>
                                         <InfoIcon />
                                     </ListItemIcon>
                                     <ListItemText primary="关于" />
-                                </ListItem>
-                                <ListItem button disabled>
-                                    <ListItemIcon>
-                                        <ColorIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary="更换主题" />
-                                </ListItem>
-                                <ListItem button onClick={this.handleClearCache}>
-                                    <ListItemIcon>
-                                        <DeleteIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary="清除缓存" />
                                 </ListItem>
                             </List>
                             <Divider />
@@ -152,51 +159,30 @@ class MainWindow extends Reflux.Component {
                     <main className={classes.content}>
                         <div className={classes.toolbar} />
                         <Grid container spacing={8}>
-                            <Grid item lg md />
-                            <Grid item lg={4} md={8} xs={12}>
-                                <Paper className={classes.paper}>
-                                    <div className={classes.center}>
-                                        <Button
-                                            className={classes.button}
-                                            onClick={this.handleFromMenuOpen}
-                                        >
-                                            {versions[this.state.fromVersion]}
-                                        </Button>
-                                        <Button
-                                            className={classes.button}
-                                            variant="outlined"
-                                            color="primary"
-                                            onClick={this.handleBeginTransform}
-                                        >
-                                            <TransferIcon />
-                                        </Button>
-                                        <Button
-                                            className={classes.button}
-                                            onClick={this.handleToMenuOpen}
-                                        >
-                                            {versions[this.state.toVersion]}
-                                        </Button>
-                                    </div>
-                                </Paper>
+                            <Grid item sm />
+                            <Grid item sm={1}>
+                                {(!this.state.rounding) && (<Button
+                                    className={classNames(classes.button)}
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={this.handleRoundingToggle}
+                                    size="large"
+                                >
+                                    <PacManIcon className={classes.extendedIcon} />
+                                    开始点名
+                                </Button>)}
+                                {(this.state.rounding) && (<Button
+                                    className={classNames(classes.button)}
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={this.handleRoundingToggle}
+                                    size="large"
+                                >
+                                    <StopIcon className={classes.extendedIcon} />
+                                    停！
+                                </Button>)}
                             </Grid>
-                            <Grid item lg md />
-                        </Grid>
-                        <Grid container spacing={8}>
-                            <Gird sm />
-                            <Grid item sm={6}>
-                                <TextField
-                                    id="before"
-                                    multiline
-                                    label="欲转换的命令/函数"
-                                    className={classes.textField}
-                                    margin="normal"
-                                    variant="outlined"
-                                    fullWidth
-                                    onChange={this.handleChangeInputCommand}
-                                    value={this.state.inputCommands}
-                                />
-                            </Grid>
-                            <Gird sm />
+                            <Grid item sm />
                         </Grid>
                         {/* 关于窗口 */}
                         <Dialog
