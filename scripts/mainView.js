@@ -1,3 +1,6 @@
+const ipc = window.require('electron').ipcRenderer;
+const fs = window.require('fs');
+
 import React from "react";
 import Reflux from "reflux";
 import PropTypes from "prop-types";
@@ -44,6 +47,8 @@ import ExpandLessIcon from 'mdi-material-ui/chevronDown';
 import ExpandMoreIcon from 'mdi-material-ui/chevronRight';
 import CloseIcon from 'mdi-material-ui/close';
 import MoreIcon from 'mdi-material-ui/dotsHorizontal';
+import FileReadIcon from 'mdi-material-ui/fileDownload';
+import FileWriteIcon from 'mdi-material-ui/fileSend';
 
 import blue from '@material-ui/core/colors/blue';
 import red from '@material-ui/core/colors/red';
@@ -75,7 +80,6 @@ const styles = theme => ({
         flex: 1
     },
     appBar: {
-        marginLeft: drawerWidth,
         opacity: 0.8
     },
     menuButton: {
@@ -122,6 +126,21 @@ const styles = theme => ({
 let randomNum = (minNum, maxNum) => parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
 
 class MainWindow extends Reflux.Component {
+    constructor(){
+        super();
+
+        ipc.on('read-file', this.handleReadFile);
+        ipc.on('saved-file', this.handleWriteFile);
+
+        // 读取默认配置文件 default.json
+        fs.readFile('./default.json', (err, data) => {
+            if (err) {
+                return console.error(err);
+            }
+            this.setState({ groups: JSON.parse(data.toString()).list });
+         });
+    }
+
     randomTimerObject = null;
 
     state = {
@@ -140,8 +159,7 @@ class MainWindow extends Reflux.Component {
         groupChangeBody: "",
         nowSelectedLuckyGuy: "点击开始",
         groups: [
-            { name: "小组1", members: ["张三", "李四", "王五", "赵六", "崔琦", "佩奇"] },
-            { name: "小组2", members: ["1", "3", "5", "7", "9", "12"] }
+            { name: "默认小组", members: ["张三", "李四", "王五"] },
         ]
     }
 
@@ -208,6 +226,24 @@ class MainWindow extends Reflux.Component {
     }
     handleGroupNameChange = (str) => this.setState({ groupChangeName: str });
     handleGroupListChange = (str) => this.setState({ groupChangeBody: str });
+    
+    handleReadFile = (e, path) => {
+        console.log(path);
+        fs.readFile(path[0], (err, data) => {
+            if (err) {
+                return console.error(err);
+            }
+            this.setState({ groups: JSON.parse(data.toString()).list });
+         });
+    }
+    handleWriteFile = (e, path) => {
+        console.log(path);
+        fs.writeFile(path, JSON.stringify({ list: this.state.groups }), (err) => {
+            if (err) {
+                return console.error(err);
+            }
+         });
+    }
 
     render() {
         const { classes } = this.props;
@@ -240,6 +276,18 @@ class MainWindow extends Reflux.Component {
                             }}
                         >
                             <List>
+                                <ListItem button onClick={() => ipc.send('read-file')}>
+                                    <ListItemIcon>
+                                        <FileReadIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="导入名单" />
+                                </ListItem>
+                                <ListItem button onClick={() => ipc.send('write-file')}>
+                                    <ListItemIcon>
+                                        <FileWriteIcon />
+                                    </ListItemIcon>
+                                    <ListItemText primary="导出名单" />
+                                </ListItem>
                                 <ListItem button onClick={this.handleAboutDialogToggle}>
                                     <ListItemIcon>
                                         <InfoIcon />
@@ -376,15 +424,18 @@ class MainWindow extends Reflux.Component {
                         >
                             <DialogTitle>关于</DialogTitle>
                             <DialogContent>
-                                <Typography paragraph variant="p">
+                                <Typography paragraph variant="body1">
                                     欢迎使用“海点”点名器！
                                 </Typography>
-                                <Typography paragraph variant="p">
+                                <Typography paragraph variant="body1">
                                     有道“海纳百川，有容乃大”，本款点名器以此为寓意，希望既能起到点名的作用，又能让使用本点名器的课堂或者活动有着大海一般的希望和深度。
                                 </Typography>
                                 <Button variant="contained" onClick={() => shell.openExternal("https://github.com/langyo/random_picker")}>
                                     该软件的开源地址
                                 </Button>
+                                <Typography paragraph variant="body1">
+                                    (https://github.com/langyo/random_picker)
+                                </Typography>
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={this.handleAboutDialogToggle} color="primary">
