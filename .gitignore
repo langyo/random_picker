@@ -59,3 +59,9 @@ typings/
 
 # next.js build output
 .next
+
+## ---
+
+# npm
+package-lock.json
+yarn.lock
